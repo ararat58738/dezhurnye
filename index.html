@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Дежурные — 118-КД9-2ИСП</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f9f9fb;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #2d3748;
+    }
+
+    .responsibility {
+      text-align: center;
+      font-size: 14px;
+      color: #4a5568;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+
+    .schedule-item {
+      margin-bottom: 24px;
+    }
+
+    .date {
+      text-align: center;
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .duty-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .duty-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #f0f4ff;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .info-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      color: #4f46e5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .bot-info {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 14px;
+      color: #718096;
+    }
+
+    .bot-info .info-icon {
+      display: inline-flex;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Дежурные группы 118-КД9-2ИСП</h1>
+    
+    <div class="responsibility">
+      Ответственные за назначение дежурных: Каминский и Мельников.
+    </div>
+
+    <div id="scheduleContainer">
+      <!-- Расписание будет добавлено сюда -->
+    </div>
+
+    <div class="bot-info">
+      Это самый лучший бот для распределения дежурств
+      <span class="info-icon" onclick="showBotInfo()">?</span>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Формат даты
+    function formatDate(date) {
+      return date.toLocaleDateString('ru-RU', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).replace(/^\w/, c => c.toUpperCase());
+    }
+
+    // Дежурные пары
+    const teams = [
+      [
+        { name: "Кухтина Данель", reason: "Ответственная за порядок и дисциплину." },
+        { name: "Москвитина Вероника", reason: "Помогает поддерживать порядок и следит за графиком." }
+      ],
+      [
+        { name: "Мугу Аллий", reason: "Помогает поддерживать чистоту и порядок в группе." },
+        { name: "Блинов Елисей", reason: "Отлично справляется с организацией и уборкой." }
+      ]
+    ];
+
+    // Генерация расписания на 365 дней
+    const startDate = new Date('2025-10-16');
+    const schedule = [];
+
+    for (let i = 0; i < 365; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      
+      const teamIndex = i % 2; // чередуем 0 и 1
+      schedule.push({
+        date: currentDate,
+        duty: teams[teamIndex]
+      });
+    }
+
+    // Отображение
+    const scheduleContainer = document.getElementById('scheduleContainer');
+    schedule.forEach(day => {
+      const scheduleItem = document.createElement('div');
+      scheduleItem.className = 'schedule-item';
+      
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'date';
+      dateDiv.textContent = formatDate(day.date);
+      
+      const dutyList = document.createElement('div');
+      dutyList.className = 'duty-list';
+      
+      day.duty.forEach(person => {
+        const item = document.createElement('div');
+        item.className = 'duty-item';
+        // Экранируем одинарные кавычки для JS
+        const safeReason = person.reason.replace(/'/g, "\\'");
+        item.innerHTML = `${person.name} <span class="info-icon" onclick="showReason('${safeReason}')">?</span>`;
+        dutyList.appendChild(item);
+      });
+      
+      scheduleItem.appendChild(dateDiv);
+      scheduleItem.appendChild(dutyList);
+      scheduleContainer.appendChild(scheduleItem);
+    });
+
+    function showReason(reason) {
+      tg.showAlert(`Почему выбран этот человек:\n\n${reason}`);
+    }
+
+    function showBotInfo() {
+      tg.showAlert("Это самый лучший бот для распределения дежурств!");
+    }
+  </script>
+</body>
+</html>
